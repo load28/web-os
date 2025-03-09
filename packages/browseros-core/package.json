@@ -1,0 +1,26 @@
+{
+  "name": "@browseros/core",
+  "version": "1.0.0",
+  "description": "Core functionality for BrowserOS",
+  "main": "dist/index.js",
+  "module": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["browseros", "microfrontend", "desktop"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "browseros3",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm run --parallel dev",
+    "dev:host": "pnpm run --filter @browseros/app dev",
+    "dev:note": "pnpm run --filter @browseros/note-app serve",
+    "dev:todo": "pnpm run --filter @browseros/todo-app serve",
+    "build": "pnpm run --filter=\"*\" build",
+    "build:apps": "pnpm run --filter=\"@browseros/note-app\" --filter=\"@browseros/todo-app\" build",
+    "start": "pnpm run --parallel start",
+    "prepare": "pnpm run --filter=\"@browseros/core\" --filter=\"@browseros/shared\" --filter=\"@browseros/react\" build"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=7.0.0"
+  }
+}

@@ -1,0 +1,85 @@
+import React, { createContext, useState, useContext, useEffect } from 'react'
+
+type User = {
+  username: string
+  name: string
+  avatar?: string
+}
+
+type AuthContextType = {
+  user: User | null
+  isLoading: boolean
+  login: (username: string, password: string) => Promise<boolean>
+  logout: () => void
+}
+
+const defaultUser = {
+  username: 'guest',
+  name: 'Guest User',
+  avatar: '/avatar-placeholder.png'
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // 로컬 스토리지에서 사용자 세션 확인
+    const storedUser = localStorage.getItem('browseros-user')
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser))
+      } catch (error) {
+        console.error('Stored user data parsing error:', error)
+        localStorage.removeItem('browseros-user')
+      }
+    }
+    setIsLoading(false)
+  }, [])
+
+  const login = async (username: string, password: string): Promise<boolean> => {
+    // 실제 환경에서는 서버에 인증 요청
+    try {
+      setIsLoading(true)
+      // 간단한 인증 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // 데모 목적으로 모든 로그인 성공 처리
+      const user = {
+        username,
+        name: username === 'admin' ? 'Administrator' : 'Regular User',
+        avatar: username === 'admin' ? '/admin-avatar.png' : '/user-avatar.png'
+      }
+      
+      setUser(user)
+      localStorage.setItem('browseros-user', JSON.stringify(user))
+      return true
+    } catch (error) {
+      console.error('Login error:', error)
+      return false
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const logout = () => {
+    setUser(null)
+    localStorage.removeItem('browseros-user')
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}

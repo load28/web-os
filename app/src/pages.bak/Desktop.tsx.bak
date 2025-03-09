@@ -1,0 +1,216 @@
+import { useState, useEffect } from 'react';
+import { type AppManifest, appManager } from '@browseros/core';
+import { NoteApp } from '../components/apps/NoteApp';
+import { TodoApp } from '../components/apps/TodoApp';
+
+// 마이크로프론트엔드 앱 정의
+const microfrontendApps: AppManifest[] = [
+  {
+    id: "note-app",
+    name: "Notes",
+    icon: "📝",
+    componentName: "NoteApp"
+  },
+  {
+    id: "todo-app",
+    name: "Todo List",
+    icon: "✓",
+    componentName: "TodoApp"
+  }
+];
+
+export default function Desktop() {
+  console.log('Desktop 컴포넌트 렌더링 시작');
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [openApps, setOpenApps] = useState<string[]>([]);
+  const [activeAppId, setActiveAppId] = useState<string | null>(null);
+  const [registeredApps, setRegisteredApps] = useState<AppManifest[]>([]);
+
+  // 앱 초기화
+  useEffect(() => {
+    const initializeApps = async () => {
+      try {
+        // 앱 등록
+        microfrontendApps.forEach(app => {
+          appManager.registerApp(app);
+        });
+
+        // 등록된 앱 목록 가져오기
+        setRegisteredApps(appManager.getAllApps());
+        setIsLoading(false);
+      } catch (error) {
+        console.error('앱 초기화 오류:', error);
+        setIsLoading(false);
+      }
+    };
+
+    initializeApps();
+
+    // 앱 이벤트 리스너 등록
+    const unsubscribe = appManager.addEventListener('system', (message) => {
+      if (message.type === 'APP_STATE_CHANGED') {
+        // 앱 상태가 변경되면 목록 갱신
+        setRegisteredApps(appManager.getAllApps());
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // 앱 실행
+  const launchApp = (appId: string) => {
+    appManager.launchApp(appId);
+    if (!openApps.includes(appId)) {
+      setOpenApps([...openApps, appId]);
+    }
+    setActiveAppId(appId);
+  };
+
+  // 앱 닫기
+  const closeApp = (appId: string) => {
+    appManager.closeApp(appId);
+    setOpenApps(openApps.filter(id => id !== appId));
+    if (activeAppId === appId) {
+      setActiveAppId(openApps.length > 1 ? openApps.filter(id => id !== appId)[0] : null);
+    }
+  };
+
+  // 앱 활성화
+  const activateApp = (appId: string) => {
+    appManager.setAppState(appId, { isActive: true });
+    setActiveAppId(appId);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen bg-blue-50">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">BrowserOS 로딩 중...</h2>
+            <div className="animate-spin w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-screen bg-blue-50">
+      {/* Desktop area */}
+      <div className="flex-1 p-4 relative">
+        {/* App Launcher Icons */}
+        <div className="grid grid-cols-6 gap-4 absolute top-4 left-4">
+          {registeredApps.map(app => (
+            <button
+              key={app.id}
+              onClick={() => launchApp(app.id)}
+              className="flex flex-col items-center p-2 rounded hover:bg-white/50 transition-colors"
+            >
+              <div className="text-3xl mb-1">{app.icon}</div>
+              <span className="text-xs">{app.name}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Open Apps - Using BrowserOS Window Management */}
+        <div className="absolute inset-0 pt-20 pb-12 pointer-events-none">
+          {openApps.map(appId => {
+            const app = registeredApps.find(a => a.id === appId);
+            if (!app) return null;
+
+            const appState = appManager.getAppState(appId);
+            if (!appState.isOpen || appState.isMinimized) return null;
+
+            return (
+              <div
+                key={appId}
+                className={`absolute pointer-events-auto border rounded-lg shadow-lg bg-white overflow-hidden transition-all ${
+                  activeAppId === appId ? 'z-10 ring-2 ring-blue-500' : 'z-0'
+                }`}
+                style={{
+                  left: `${appState.position.x}px`,
+                  top: `${appState.position.y}px`,
+                  width: `${appState.size.width}px`,
+                  height: `${appState.size.height}px`,
+                }}
+                onClick={() => activateApp(appId)}
+              >
+                {/* Window Header */}
+                <div
+                  className="flex items-center justify-between p-2 bg-gray-50 border-b cursor-move"
+                  onMouseDown={(e) => {
+                    if (e.target === e.currentTarget) {
+                      // 여기에 드래그 로직 추가
+                      activateApp(appId);
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{app.icon}</span>
+                    <span className="font-medium text-sm">{app.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => appManager.minimizeApp(appId)}
+                      className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-200"
+                    >
+                      🔽
+                    </button>
+                    <button
+                      onClick={() => closeApp(appId)}
+                      className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-red-100"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                {/* Window Content with Direct Component Loading */}
+                <div className="h-[calc(100%-40px)] overflow-auto">
+                  {app.componentName === "NoteApp" && <NoteApp />}
+                  {app.componentName === "TodoApp" && <TodoApp />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Taskbar */}
+      <div className="h-12 bg-gray-800 text-white flex items-center px-4 z-50">
+        <div className="flex gap-2">
+          {openApps.map(appId => {
+            const app = registeredApps.find(a => a.id === appId);
+            if (!app) return null;
+
+            const appState = appManager.getAppState(appId);
+
+            return (
+              <button
+                key={appId}
+                onClick={() => {
+                  if (appState.isMinimized) {
+                    appManager.setAppState(appId, { isMinimized: false, isActive: true });
+                  } else if (appState.isActive) {
+                    appManager.minimizeApp(appId);
+                  } else {
+                    activateApp(appId);
+                  }
+                }}
+                className={`h-8 px-3 flex items-center gap-1 rounded transition-colors ${
+                  activeAppId === appId ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+                }`}
+              >
+                <span>{app.icon}</span>
+                <span className="text-xs">{app.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
