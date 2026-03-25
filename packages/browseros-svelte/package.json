@@ -1,0 +1,34 @@
+{
+  "name": "@browseros/svelte",
+  "version": "1.0.0",
+  "description": "Svelte components for BrowserOS",
+  "type": "module",
+  "svelte": "src/index.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "svelte": "./src/index.ts",
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "echo 'no build needed - consumed via source'",
+    "dev": "echo 'no dev needed'"
+  },
+  "keywords": ["browseros", "svelte", "microfrontend", "desktop"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@browseros/core": "workspace:*",
+    "@browseros/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "svelte": "^5.0.0",
+    "typescript": "^5.0.0"
+  }
+}
