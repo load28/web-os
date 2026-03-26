@@ -1,7 +1,3 @@
-"use client"
-
-import { useEffect } from "react"
-
 export interface AppMessagePayload {
   [key: string]: any;
   content?: string;
@@ -43,7 +39,7 @@ class MessageBus {
   publish(message: AppMessage): void {
     // 메시지 객체를 깊은 복사하여 전달 (객체 참조 문제 방지)
     const safeMessage = this.safeClone(message);
-    
+
     // 특정 대상이 있는 경우
     if (safeMessage.target) {
       const targetListeners = this.listeners.get(safeMessage.target)
@@ -61,14 +57,14 @@ class MessageBus {
       })
     }
   }
-  
+
   // 객체를 안전하게 복제 (깊은 복사)
   private safeClone<T>(obj: T): T {
     // 기본 타입이거나 null/undefined인 경우 그대로 반환
     if (obj === null || obj === undefined || typeof obj !== 'object') {
       return obj;
     }
-    
+
     try {
       // JSON을 통한 깊은 복사 시도
       return JSON.parse(JSON.stringify(obj));
@@ -82,31 +78,3 @@ class MessageBus {
 
 // 싱글톤 인스턴스 생성
 export const messageBus = new MessageBus()
-
-// React 훅으로 메시지 버스 사용
-export function useMessageBus(appId: string, onMessage?: (message: AppMessage) => void) {
-  useEffect(() => {
-    if (!onMessage) return
-
-    // 메시지 구독
-    const unsubscribe = messageBus.subscribe(appId, onMessage)
-
-    // 컴포넌트 언마운트 시 구독 취소
-    return unsubscribe
-  }, [appId, onMessage])
-
-  // 메시지 발행 함수 반환
-  return {
-    sendMessage: (target: string | undefined, type: string, payload: AppMessagePayload) => {
-      // payload가 null이나 undefined인 경우 빈 객체 사용
-      const safePayload = payload ?? {};
-      
-      messageBus.publish({
-        source: appId,
-        target,
-        type,
-        payload: safePayload,
-      })
-    },
-  }
-}

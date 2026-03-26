@@ -3,12 +3,10 @@ export default {
   darkMode: ["class"],
   content: [
     './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
-    '../packages/note-app/src/**/*.{js,ts,jsx,tsx}',
-    '../packages/todo-app/src/**/*.{js,ts,jsx,tsx}',
-    '../packages/browseros-react/src/**/*.{js,ts,jsx,tsx}',
-    '../packages/browseros-core/src/**/*.{js,ts,jsx,tsx}',
-    '../packages/browseros-shared/src/**/*.{js,ts,jsx,tsx}'
+    './src/**/*.{js,ts,svelte}',
+    '../packages/browseros-svelte/src/**/*.{js,ts,svelte}',
+    '../packages/browseros-core/src/**/*.{js,ts}',
+    '../packages/browseros-shared/src/**/*.{js,ts}'
   ],
   prefix: "",
   theme: {
@@ -59,20 +57,6 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-      },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },

@@ -5,12 +5,9 @@
   "scripts": {
     "dev": "pnpm run --parallel dev",
     "dev:host": "pnpm run --filter @browseros/app dev",
-    "dev:note": "pnpm run --filter @browseros/note-app serve",
-    "dev:todo": "pnpm run --filter @browseros/todo-app serve",
     "build": "pnpm run --filter=\"*\" build",
-    "build:apps": "pnpm run --filter=\"@browseros/note-app\" --filter=\"@browseros/todo-app\" build",
     "start": "pnpm run --parallel start",
-    "prepare": "pnpm run --filter=\"@browseros/core\" --filter=\"@browseros/shared\" --filter=\"@browseros/react\" build"
+    "prepare": "pnpm run --filter=\"@browseros/core\" --filter=\"@browseros/shared\" build"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

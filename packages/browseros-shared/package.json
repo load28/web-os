@@ -15,11 +15,7 @@
     "build": "tsc",
     "dev": "tsc --watch"
   },
-  "dependencies": {
-    "react": "^18.2.0"
-  },
   "devDependencies": {
-    "typescript": "^5.4.2",
-    "@types/react": "^18.2.0"
+    "typescript": "^5.4.2"
   }
 }
